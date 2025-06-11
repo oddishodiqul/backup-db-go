@@ -21,11 +21,22 @@ var backupCmd = &cobra.Command{
 
 func backup() {
 	// Prompt for SSH password input
+	var sshPassword string
+	var dbPassword string
+	var err error
+
 	fmt.Print("Enter SSH password: ")
-	sshPassword, err := readPassword()
+	sshPassword, err = readPassword()
 
 	if err != nil {
 		log.Fatalf("Failed to read SSH password: %v", err)
+	}
+
+	fmt.Print("Enter DB password: ")
+	dbPassword, err = readPassword()
+
+	if err != nil {
+		log.Fatalf("Failed to read DB password: %v", err)
 	}
 
 	// Proceed with the backup process
@@ -35,7 +46,7 @@ func backup() {
 		SSHPassword: sshPassword, // Use the masked password here
 
 		PGUser:     os.Getenv("PG_USER"),
-		PGPassword: os.Getenv("PG_PASSWORD"),
+		PGPassword: dbPassword,
 		PGDatabase: os.Getenv("PG_DATABASE_NAME"),
 
 		OutputFile: os.Getenv("DB_BACKUP"),
