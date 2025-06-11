@@ -20,11 +20,22 @@ var restoreCmd = &cobra.Command{
 
 func restore() {
 	// Prompt for SSH password input
+	var sshPassword string
+	var dbPassword string
+	var err error
+
 	fmt.Print("Enter SSH password: ")
-	sshPassword, err := readPassword()
+	sshPassword, err = readPassword()
 
 	if err != nil {
 		log.Fatalf("Failed to read SSH password: %v", err)
+	}
+
+	fmt.Print("Enter DB password: ")
+	dbPassword, err = readPassword()
+
+	if err != nil {
+		log.Fatalf("Failed to read DB password: %v", err)
 	}
 
 	err = sshrestore.RestorePostgresViaSSH(sshrestore.Options{
@@ -33,7 +44,7 @@ func restore() {
 		SSHPassword: sshPassword,
 
 		PGUser:     os.Getenv("PG_USER"),
-		PGPassword: os.Getenv("PG_PASSWORD"),
+		PGPassword: dbPassword,
 		PGDatabase: os.Getenv("PG_DATABASE_TARGET"),
 
 		BackupFilePath: os.Getenv("DB_RESTORE"),
