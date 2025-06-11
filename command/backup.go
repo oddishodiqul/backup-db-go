@@ -1,9 +1,11 @@
 package command
 
 import (
+	"fmt"
 	"log"
 	"os"
 
+	"github.com/howeyc/gopass" // External package for password masking
 	"github.com/oddishodiqul/backup-db-go.git/sshbackup"
 	"github.com/spf13/cobra"
 )
@@ -18,10 +20,19 @@ var backupCmd = &cobra.Command{
 }
 
 func backup() {
-	err := sshbackup.DumpPostgresViaSSH(sshbackup.Options{
+	// Prompt for SSH password input
+	fmt.Print("Enter SSH password: ")
+	sshPassword, err := readPassword()
+
+	if err != nil {
+		log.Fatalf("Failed to read SSH password: %v", err)
+	}
+
+	// Proceed with the backup process
+	err = sshbackup.DumpPostgresViaSSH(sshbackup.Options{
 		SSHHost:     os.Getenv("SSH_HOST"),
 		SSHUser:     os.Getenv("SSH_USER"),
-		SSHPassword: os.Getenv("SSH_PASSWORD"),
+		SSHPassword: sshPassword, // Use the masked password here
 
 		PGUser:     os.Getenv("PG_USER"),
 		PGPassword: os.Getenv("PG_PASSWORD"),
@@ -35,6 +46,16 @@ func backup() {
 	}
 
 	log.Println("✅ Backup completed successfully")
+}
+
+func readPassword() (string, error) {
+	// Use gopass to mask the input for password
+	password, err := gopass.GetPasswd()
+	if err != nil {
+		return "", err
+	}
+
+	return string(password), nil
 }
 
 func init() {
