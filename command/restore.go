@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -18,10 +19,18 @@ var restoreCmd = &cobra.Command{
 }
 
 func restore() {
-	err := sshrestore.RestorePostgresViaSSH(sshrestore.Options{
+	// Prompt for SSH password input
+	fmt.Print("Enter SSH password: ")
+	sshPassword, err := readPassword()
+
+	if err != nil {
+		log.Fatalf("Failed to read SSH password: %v", err)
+	}
+
+	err = sshrestore.RestorePostgresViaSSH(sshrestore.Options{
 		SSHHost:     os.Getenv("SSH_HOST"),
 		SSHUser:     os.Getenv("SSH_USER"),
-		SSHPassword: os.Getenv("SSH_PASSWORD"),
+		SSHPassword: sshPassword,
 
 		PGUser:     os.Getenv("PG_USER"),
 		PGPassword: os.Getenv("PG_PASSWORD"),
